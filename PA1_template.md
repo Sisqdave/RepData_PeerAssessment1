@@ -11,7 +11,8 @@ keep_md: true
 ### Loading and preprocessing the data  
  
 
-```{r, echo = TRUE}
+
+```r
 ###Load Libraries
 suppressMessages(library(dplyr))
 library(tidyr)
@@ -28,12 +29,12 @@ unzip("repdata_data_activity.zip")
 amData <- read.csv("activity.csv" )
 data <- tbl_df(amData)
 data$date <- ymd(data$date)
-
 ```
 
 ### Total and average of steps taken per day
 
-```{r, echo=TRUE}
+
+```r
 sumstepsday <- aggregate(steps ~ date, data = data, sum)
 sumstepsday <- mutate(sumstepsday, wday = wday(sumstepsday$date, label = TRUE))
 sumstepsweekday <- aggregate(steps ~ wday, data = sumstepsday, sum)
@@ -49,12 +50,19 @@ sg <- sg + ggtitle("Total steps per Weekday")
 sg
 ```
 
-Mean steps taken per day: `r meanStepsDay`  
-median steps taken per day: `r medianStepsDay`  
+```
+## stat_bin: binwidth defaulted to range/30. Use 'binwidth = x' to adjust this.
+```
+
+![plot of chunk unnamed-chunk-2](figure/unnamed-chunk-2-1.png) 
+
+Mean steps taken per day: 10766  
+median steps taken per day: 10765  
 
 ### What is the average daily activity pattern?
 
-```{r, echo=TRUE}
+
+```r
 FiveMInterval <- aggregate(steps ~ interval, data = data, sum)
 maxSteps <- range(FiveMInterval)[2]
 maxInterval <- filter(FiveMInterval, steps == maxSteps)$interval
@@ -67,13 +75,15 @@ FMG <- FMG + ggtitle("Average daily activity pattern")
 FMG
 ```
 
-Interval `r maxInterval` on average across all of the days in the dataset contains the maximum step count of `r maxSteps`  
+![plot of chunk unnamed-chunk-3](figure/unnamed-chunk-3-1.png) 
+
+Interval 835 on average across all of the days in the dataset contains the maximum step count of 10927  
 
 
 ### Imputing missing values
 Missing value have been replaced with the average for that weekday.
-```{r, echo = TRUE}
 
+```r
 naCount <- sum(is.na(data))
 meanstepsweekday <- aggregate(steps ~ wday, data = sumstepsday, mean)
 naDays <- unique(select(subset(data, is.na(steps)), date))
@@ -91,16 +101,23 @@ msg <- msg + xlab("Date")
 msg <- msg + ggtitle("Total steps per day")
 msg
 ```
-Number of NAs in the data: `r naCount`
-Modified Mean steps taken per day: `r meanmodStepsDay`  
-Modified median steps taken per day: `r medianmodStepsDay`   
+
+```
+## stat_bin: binwidth defaulted to range/30. Use 'binwidth = x' to adjust this.
+```
+
+![plot of chunk unnamed-chunk-4](figure/unnamed-chunk-4-1.png) 
+Number of NAs in the data: 2304
+Modified Mean steps taken per day: 10821  
+Modified median steps taken per day: 11015   
 
 These values differ slightly from the first estimates. 
 This does seem to change the actual nature of the data collecte
 
 ### Are there differences in activity patterns between weekdays and weekends?
 
-```{r, echo=TRUE}
+
+```r
 weekdaydif <- modifiedsumstepsday
 weekDay <- filter(weekdaydif, wday == "Mon" | wday == "Tues" | wday == "Wed" | wday == "Thurs" | wday == "Fri")
 weekDay <- mutate(weekDay, daytype = "weekday")
@@ -115,3 +132,9 @@ WMG <- WMG + scale_y_continuous(breaks=seq(0,12000,1000))
 WMG <- WMG + ggtitle("Daily activity pattern")
 WMG
 ```
+
+```
+## Warning: Removed 2 rows containing missing values (geom_path).
+```
+
+![plot of chunk unnamed-chunk-5](figure/unnamed-chunk-5-1.png) 
